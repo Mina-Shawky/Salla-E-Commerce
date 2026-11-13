@@ -1,0 +1,41 @@
+﻿using BusinessLogic.Services.Interfaces;
+using DataAccess.DTOs.Request;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace Salla.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize(Roles = "Customer")]
+    public class CheckOutController : ControllerBase
+    {
+        private readonly ICheckOutService _checkOutService;
+        public CheckOutController(ICheckOutService checkOutService)
+        {
+            _checkOutService = checkOutService;
+        }
+        [HttpPost("payment")]
+        public async Task<IActionResult> Payment([FromBody] CheckOutRequestDTO request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var response = await _checkOutService.ProcessPaymentAsync(request, userId, Request);
+            return Ok(response);
+        }
+        [HttpGet("success/{orderId}")]
+        [AllowAnonymous]
+        public async Task<ActionResult> Success([FromRoute] int orderId)
+        {
+            var result = await _checkOutService.HandlePaymentSuccessAsync(orderId);
+            return Ok(result);
+        }
+        [HttpGet("cancel")]
+        [AllowAnonymous]
+        public ActionResult Cancel()
+        {
+            return Ok("Cancel");
+        }
+    }
+}
