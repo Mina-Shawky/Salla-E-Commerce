@@ -1,4 +1,4 @@
-```html
+
 <div align="center">
 
   <h1>🛒 Salla - E-Commerce API</h1>
